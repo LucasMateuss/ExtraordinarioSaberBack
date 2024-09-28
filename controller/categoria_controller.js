@@ -4,7 +4,6 @@ import sequelize from "../config/connection.js";
 import jwt from "jsonwebtoken";
 import Usuario from "../models/usuario_model.js";
 
-// Função auxiliar para extrair o usuário do token JWT
 const getUserFromToken = async (req) => {
   const token = req.headers["x-access-token"];
   if (!token) {
@@ -30,7 +29,7 @@ categoria.Todos = async function (req, res) {
   try {
     const user = await getUserFromToken(req);
     let categorias = await Categoria.findAll({
-      where: { id_usuario: user.Id_Usuario }, // Filtra pelas categorias do usuário
+      where: { id_usuario: user.Id_Usuario },
     });
     res.send(categorias);
   } catch (e) {
@@ -46,7 +45,7 @@ categoria.Inserir = async function (req, res) {
     const user = await getUserFromToken(req);
     let categoria = {
       ...req.body,
-      id_usuario: user.Id_Usuario, // Vincula a categoria ao usuário
+      id_usuario: user.Id_Usuario,
     };
     let result = await Categoria.create(categoria);
     res.send({
@@ -70,16 +69,14 @@ categoria.Atualizar = async function (req, res) {
     let categoria = await Categoria.findOne({
       where: {
         id_categoria: id_categoria,
-        id_usuario: user.Id_Usuario, // Garante que a categoria pertence ao usuário
+        id_usuario: user.Id_Usuario,
       },
     });
 
     if (!categoria) {
-      return res
-        .status(404)
-        .json({
-          message: "Categoria não encontrada ou não pertence a este usuário",
-        });
+      return res.status(404).json({
+        message: "Categoria não encontrada ou não pertence a este usuário",
+      });
     }
 
     let result = await Categoria.update(
@@ -107,16 +104,14 @@ categoria.Deletar = async function (req, res) {
     let categoria = await Categoria.findOne({
       where: {
         id_categoria: id_categoria,
-        id_usuario: user.Id_Usuario, // Garante que a categoria pertence ao usuário
+        id_usuario: user.Id_Usuario,
       },
     });
 
     if (!categoria) {
-      return res
-        .status(404)
-        .json({
-          message: "Categoria não encontrada ou não pertence a este usuário",
-        });
+      return res.status(404).json({
+        message: "Categoria não encontrada ou não pertence a este usuário",
+      });
     }
 
     let result = await Categoria.destroy({
@@ -146,16 +141,14 @@ categoria.ObterPorCodigo = async function (req, res) {
     let categoria = await Categoria.findOne({
       where: {
         id_categoria: id_categoria,
-        id_usuario: user.Id_Usuario, // Garante que a categoria pertence ao usuário
+        id_usuario: user.Id_Usuario,
       },
     });
 
     if (!categoria) {
-      return res
-        .status(404)
-        .json({
-          message: "Categoria não encontrada ou não pertence a este usuário",
-        });
+      return res.status(404).json({
+        message: "Categoria não encontrada ou não pertence a este usuário",
+      });
     }
 
     res.send(categoria);
