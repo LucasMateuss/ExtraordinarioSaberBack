@@ -14,7 +14,7 @@ let categoriaRouter = express.Router();
  *       200:
  *         description: Lista de categorias
  */
-categoriaRouter.get("/", categoria.Todos);
+categoriaRouter.get("/", verifyJWT, categoria.Todos);
 
 /**
  * @swagger
@@ -104,6 +104,6 @@ categoriaRouter.delete("/:id_categoria", verifyJWT, categoria.Deletar);
  *       200:
  *         description: Categoria encontrada
  */
-categoriaRouter.get("/:id_categoria", categoria.ObterPorCodigo);
+categoriaRouter.get("/:id_categoria", verifyJWT, categoria.ObterPorCodigo);
 
 export { categoriaRouter };

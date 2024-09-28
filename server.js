@@ -23,7 +23,7 @@ const options = {
       version: "1.0.0",
     },
   },
-  apis: ["./routes/*.js", "./controller/*.js"], // Caminho para os arquivos que contêm anotações
+  apis: ["./routes/*.js", "./controller/*.js"],
 };
 const swaggerSpec = swaggerJsdoc(options);
 

@@ -1,111 +1,170 @@
-import Categoria from "../models/categoria_model.js"
-import { QueryTypes } from "sequelize"
-import sequelize from "../config/connection.js"
+import Categoria from "../models/categoria_model.js";
+import { QueryTypes } from "sequelize";
+import sequelize from "../config/connection.js";
+import jwt from "jsonwebtoken";
+import Usuario from "../models/usuario_model.js";
 
+// Função auxiliar para extrair o usuário do token JWT
+const getUserFromToken = async (req) => {
+  const token = req.headers["x-access-token"];
+  if (!token) {
+    throw new Error("Token is missing");
+  }
 
-let categoria = {}
+  const decoded = jwt.verify(token, process.env.SECRET);
+  if (!decoded) {
+    throw new Error("Invalid token");
+  }
 
-categoria.Todos = async function(req, res){
-    try {
-        let categorias = await Categoria.findAll();
-        res.send(categorias)
-    } catch (e){
-        res.status(500).json({
-            erro: e
-        })
+  const user = await Usuario.findByPk(decoded.id);
+  if (!user) {
+    throw new Error("User not found");
+  }
 
-        console.log("erro: ", e)
+  return user;
+};
+
+let categoria = {};
+
+categoria.Todos = async function (req, res) {
+  try {
+    const user = await getUserFromToken(req);
+    let categorias = await Categoria.findAll({
+      where: { id_usuario: user.Id_Usuario }, // Filtra pelas categorias do usuário
+    });
+    res.send(categorias);
+  } catch (e) {
+    res.status(500).json({
+      erro: e.message,
+    });
+    console.log("erro: ", e);
+  }
+};
+
+categoria.Inserir = async function (req, res) {
+  try {
+    const user = await getUserFromToken(req);
+    let categoria = {
+      ...req.body,
+      id_usuario: user.Id_Usuario, // Vincula a categoria ao usuário
+    };
+    let result = await Categoria.create(categoria);
+    res.send({
+      status: "Inserção Efetuada com sucesso!",
+      result: result,
+    });
+  } catch (e) {
+    res.status(500).json({
+      erro: e.message,
+    });
+    console.log("erro: ", e);
+  }
+};
+
+categoria.Atualizar = async function (req, res) {
+  try {
+    const user = await getUserFromToken(req);
+    let id_categoria = req.params.id_categoria;
+    let { nome_categoria } = req.body;
+
+    let categoria = await Categoria.findOne({
+      where: {
+        id_categoria: id_categoria,
+        id_usuario: user.Id_Usuario, // Garante que a categoria pertence ao usuário
+      },
+    });
+
+    if (!categoria) {
+      return res
+        .status(404)
+        .json({
+          message: "Categoria não encontrada ou não pertence a este usuário",
+        });
     }
-}
 
-categoria.Inserir = async function(req, res) {
-    try{
-        let categoria = req.body
-        let result = await Categoria.create(categoria)
-        res.send({
-            status: "Inserção Efetuada com sucesso!",
-            result: result
- 
- 
-        })
-    } catch (e) {
-        res.status(500).json({
-            erro: e
-        })
+    let result = await Categoria.update(
+      { nome_categoria: nome_categoria },
+      { where: { id_categoria: id_categoria } }
+    );
 
-        console.log("erro: ", e)
+    res.send({
+      status: `Atualização da categoria de Nome: ${nome_categoria}, Código: ${id_categoria}`,
+      result: result,
+    });
+  } catch (e) {
+    res.status(500).json({
+      erro: e.message,
+    });
+    console.log("erro: ", e);
+  }
+};
+
+categoria.Deletar = async function (req, res) {
+  try {
+    const user = await getUserFromToken(req);
+    let id_categoria = req.params.id_categoria;
+
+    let categoria = await Categoria.findOne({
+      where: {
+        id_categoria: id_categoria,
+        id_usuario: user.Id_Usuario, // Garante que a categoria pertence ao usuário
+      },
+    });
+
+    if (!categoria) {
+      return res
+        .status(404)
+        .json({
+          message: "Categoria não encontrada ou não pertence a este usuário",
+        });
     }
-}
 
-categoria.Atualizar = async function(req,res){
-    try{
-        let id_categoria = req.params.id_categoria
-        let { nome_categoria } = req.body
-        let result = await Categoria.update({
-            nome_categoria: !nome_categoria ? undefined : nome_categoria
-        },{
-            where: {
-                id_categoria: id_categoria
-            }
-        })
+    let result = await Categoria.destroy({
+      where: { id_categoria: id_categoria },
+    });
 
-        res.send({
+    res.send({
+      status:
+        "A exclusão da categoria com código: " +
+        id_categoria +
+        " foi efetuada!",
+      result: result,
+    });
+  } catch (e) {
+    res.status(500).json({
+      erro: e.message,
+    });
+    console.log("erro: ", e);
+  }
+};
 
-            status: `Atualização da categoria de Nome: ${nome_categoria}, Código: ${id_categoria}`,
-            result: result 
-        })
-    } catch (e){
-        res.status(500).json({
-            erro: e
-        })
+categoria.ObterPorCodigo = async function (req, res) {
+  try {
+    const user = await getUserFromToken(req);
+    let id_categoria = req.params.id_categoria;
 
-        console.log("erro: ", e)
+    let categoria = await Categoria.findOne({
+      where: {
+        id_categoria: id_categoria,
+        id_usuario: user.Id_Usuario, // Garante que a categoria pertence ao usuário
+      },
+    });
+
+    if (!categoria) {
+      return res
+        .status(404)
+        .json({
+          message: "Categoria não encontrada ou não pertence a este usuário",
+        });
     }
-}
 
-categoria.Deletar = async function (req, res){
-    try {
-        
-        let id_categoria = req.params.id_categoria
+    res.send(categoria);
+  } catch (e) {
+    res.status(500).json({
+      erro: e.message,
+    });
+    console.log("erro: ", e);
+  }
+};
 
-        let result = await Categoria.destroy({
-            where: {
-                id_categoria: id_categoria
-            }
-        })
-
-        res.send({
-
-            status: "A exclusao da categoria com código: " + id_categoria + " foi efetuada!",
-            result: result 
-        })
-        } 
-    catch (e){
-        res.status(500).json({
-            erro: e
-        })
-
-        console.log("erro: ", e)
-    }
-}
-
-categoria.ObterPorCodigo = async function(req, res){
-    try {
-
-        let id_categoria = req.params.id_categoria
-        let categoria = (await sequelize.query("SELECT * FROM categoria WHERE id_categoria=?;", {
-            replacements: [id_categoria],
-            type: QueryTypes.SELECT,
-        }))[0]
-
-        res.send(categoria)
-    } catch (e){
-        res.status(500).json({
-            erro: e
-        })
-
-        console.log("erro: ", e)
-    }
-}
-
-export {categoria}
+export { categoria };
