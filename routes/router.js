@@ -11,8 +11,6 @@ let ConfigurarRotas = async () => {
 
     router.use("/token", authRouter);
     router.use("/categoria", verifyJWT, categoriaRouter);
-    router.use("/pedido", pedidoRouter);
-    router.use("/produto", produtoRouter);
     router.use("/", authRouter);
 
     return router;

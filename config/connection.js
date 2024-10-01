@@ -4,14 +4,17 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const sequelize = new Sequelize(
-  "mysql://root:admin@localhost:3306/ExtraordinarioSaber"
+  "postgres://extraordinariosaber_user:L8JNYnAF59mhp4zitJqkGsSBZAZ1GVlL@dpg-crtmd09u0jms73ah6c50-a:5432/extraordinariosaber"
 );
 
-try {
-  await sequelize.authenticate();
-  console.log("Connection has been established successfully.");
-} catch (error) {
-  console.error("Unable to connect to the database:", error);
-}
+(async () => {
+  try {
+    await sequelize.authenticate();
+
+    await sequelize.sync({ force: false });
+  } catch (error) {
+    console.error(error);
+  }
+})();
 
 export default sequelize;
