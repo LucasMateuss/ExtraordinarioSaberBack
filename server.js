@@ -18,8 +18,13 @@ const options = {
   definition: {
     openapi: "3.0.0",
     info: {
-      title: "API Documentation",
+      title: "API ServerSideN3 Documentation",
       version: "1.0.0",
+      description: "Documentação da API do projeto Extraordinário Saber",
+      contact: {
+        name: "Lucas Souza",
+        email: "lucasmateus290903@gmail.com",
+      },
     },
   },
   apis: ["./routes/*.js", "./controller/*.js"],

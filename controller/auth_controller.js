@@ -19,7 +19,6 @@ const login = async (req, res) => {
         .json({ message: "Autenticação falhou. Senha incorreta." });
     }
 
-    console.log("SECRET:", user);
     const token = jwt.sign(
       { id: user.Id_Usuario, email: user.email, admin: user.Administrador },
       process.env.SECRET,
@@ -38,15 +37,10 @@ const register = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    console.log("Recebendo dados de registro:", req.body);
-
     const existingUser = await Usuario.findOne({ where: { email: email } });
     if (existingUser) {
-      console.log("Usuário já existe:", existingUser);
       return res.status(400).json({ message: "Usuário já existe." });
     }
-
-    console.log("Usuário não encontrado, criando novo usuário...");
 
     const newUser = await Usuario.create({
       email: email,
@@ -70,7 +64,6 @@ const register = async (req, res) => {
       .status(201)
       .json({ token, message: "Usuário cadastrado com sucesso" });
   } catch (error) {
-    console.error("Erro ao registrar usuário:", error);
     return res.status(500).json({ message: "Erro no servidor.", error });
   }
 };

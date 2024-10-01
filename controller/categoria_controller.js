@@ -7,17 +7,17 @@ import Usuario from "../models/usuario_model.js";
 const getUserFromToken = async (req) => {
   const token = req.headers["x-access-token"];
   if (!token) {
-    throw new Error("Token is missing");
+    throw new Error("Token não informado");
   }
 
   const decoded = jwt.verify(token, process.env.SECRET);
   if (!decoded) {
-    throw new Error("Invalid token");
+    throw new Error("Token inválido");
   }
 
   const user = await Usuario.findByPk(decoded.id);
   if (!user) {
-    throw new Error("User not found");
+    throw new Error("Usuário não encontrado");
   }
 
   return user;
